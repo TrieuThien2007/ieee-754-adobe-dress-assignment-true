@@ -39,6 +39,7 @@ float ieee_754(uint32_t const data) {
     uint8_t const sign = (data >> 31) & 1U;
     uint8_t const exponent = (data >> 23) & 0xFFU;
     uint32_t const mantissa_bits = data & 0x7FFFFFU;
+    float const mantissa = calculate_mantissa(mantissa_bits);
     float value;
     
     value = 1.23;
