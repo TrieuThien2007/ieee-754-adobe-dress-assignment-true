@@ -20,11 +20,21 @@ uint8_t const exp_width = 8U;
 uint8_t const mantissa_width = width - exp_width - 1;
 uint8_t const bias = 127U;
 
-/*
- * *** STUDENTS SHOULD WRITE CODE FOR THIS FUNCTION ***
- * Students should create or add any data structures needed.
- * Students should create or add any functions or classes they may need.
- */
+float calculate_mantissa(uint32_t const mantissa_bits) {
+    float mantissa = 0.0F;
+    float bit_value = 0.5F;
+
+    for (int8_t i = 22; i >= 0; i--) {
+        if ((mantissa_bits >> i) & 1U) {
+            mantissa += bit_value;
+        }
+
+        bit_value /= 2.0F;
+    }
+
+    return mantissa;
+}
+
 float ieee_754(uint32_t const data) {
     uint8_t const sign = (data >> 31) & 1U;
     uint8_t const exponent = (data >> 23) & 0xFFU;
