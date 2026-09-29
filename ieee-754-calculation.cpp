@@ -44,7 +44,9 @@ float ieee_754(uint32_t const data) {
     int const actual_exponent = (exponent == 0U)
     ? 1 - bias
     : exponent - bias;
-    
+
+    float const sign_value = (sign == 0U) ? 1.0F : -1.0F;
+
     float value;
     
     value = 1.23;
