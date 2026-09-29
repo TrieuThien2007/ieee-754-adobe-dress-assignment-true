@@ -41,6 +41,10 @@ float ieee_754(uint32_t const data) {
     uint32_t const mantissa_bits = data & 0x7FFFFFU;
     float const mantissa = calculate_mantissa(mantissa_bits);
     float const leading_bit = (exponent == 0U) ? 0.0F : 1.0F;
+    int const actual_exponent = (exponent == 0U)
+    ? 1 - bias
+    : exponent - bias;
+    
     float value;
     
     value = 1.23;
