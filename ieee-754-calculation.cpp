@@ -21,122 +21,123 @@ uint8_t const mantissa_width = width - exp_width - 1;
 uint8_t const bias = 127U;
 
 float calculate_mantissa(uint32_t const mantissa_bits) {
-    float mantissa = 0.0F;
-    float bit_value = 0.5F;
+  float mantissa = 0.0F;
+  float bit_value = 0.5F;
 
-    for (int8_t i = 22; i >= 0; i--) {
-        if ((mantissa_bits >> i) & 1U) {
-            mantissa += bit_value;
-        }
-
-        bit_value /= 2.0F;
+  for (int8_t i = 22; i >= 0; i--) {
+    if ((mantissa_bits >> i) & 1U) {
+      mantissa += bit_value;
     }
 
-    return mantissa;
+    bit_value /= 2.0F;
+  }
+
+  return mantissa;
 }
 
 float ieee_754(uint32_t const data) {
-    uint8_t const sign = (data >> 31) & 1U;
-    uint8_t const exponent = (data >> 23) & 0xFFU;
-    uint32_t const mantissa_bits = data & 0x7FFFFFU;
-    float const mantissa = calculate_mantissa(mantissa_bits);
-    float const leading_bit = (exponent == 0U) ? 0.0F : 1.0F;
-    int const actual_exponent = (exponent == 0U)
-    ? 1 - bias
-    : exponent - bias;
+  uint8_t const sign = (data >> 31) & 1U;
+  uint8_t const exponent = (data >> 23) & 0xFFU;
+  uint32_t const mantissa_bits = data & 0x7FFFFFU;
+  float const mantissa = calculate_mantissa(mantissa_bits);
+  float const leading_bit = (exponent == 0U) ? 0.0F : 1.0F;
+  int const actual_exponent = (exponent == 0U) ? 1 - bias : exponent - bias;
 
-    float const sign_value = (sign == 0U) ? 1.0F : -1.0F;
+  float const sign_value = (sign == 0U) ? 1.0F : -1.0F;
 
-    float value;
-    
-    value = sign_value * (leading_bit + mantissa)
-    * pow(2.0F, actual_exponent);
-    return value;
+  float value;
+
+  value = sign_value * (leading_bit + mantissa) * pow(2.0F, actual_exponent);
+  return value;
 }
 
 /*
- * *** STUDENTS SHOULD NOT NEED TO CHANGE THE CODE BELOW. IT IS A CUSTOM TEST HARNESS. ***
+ * *** STUDENTS SHOULD NOT NEED TO CHANGE THE CODE BELOW. IT IS A CUSTOM TEST
+ * HARNESS. ***
  */
 
 void header() {
-    cout << left << setw(table_width[0]) << setfill(' ') << "pass/fail";
-    cout << left << setw(table_width[1]) << setfill(' ') << "value";
-    cout << left << setw(table_width[2]) << setfill(' ') << "bits";
-    cout << left << setw(table_width[3]) << setfill(' ') << "IEEE-754" << endl;
+  cout << left << setw(table_width[0]) << setfill(' ') << "pass/fail";
+  cout << left << setw(table_width[1]) << setfill(' ') << "value";
+  cout << left << setw(table_width[2]) << setfill(' ') << "bits";
+  cout << left << setw(table_width[3]) << setfill(' ') << "IEEE-754" << endl;
 
-    cout << left << setw(table_width[0]) << setfill(' ') << "--------";
-    cout << left << setw(table_width[1]) << setfill(' ') << "--------";
-    cout << left << setw(table_width[2]) << setfill(' ') << "--------";
-    cout << left << setw(table_width[3]) << setfill(' ') << "--------" << endl;
+  cout << left << setw(table_width[0]) << setfill(' ') << "--------";
+  cout << left << setw(table_width[1]) << setfill(' ') << "--------";
+  cout << left << setw(table_width[2]) << setfill(' ') << "--------";
+  cout << left << setw(table_width[3]) << setfill(' ') << "--------" << endl;
 }
 
-void print_row(bool const test_success, float const rand_val, uint32_t const val_int, float const ieee_754_value) {
-    // print results
-    string const pass_fail = test_success ? "PASS" : "FAIL";
-    cout << left << setw(table_width[0]) << setfill(' ') << pass_fail;
-    cout << left << setw(table_width[1]) << setfill(' ') << rand_val;
-    cout << left << setw(table_width[2]) << setfill(' ') << bitset<width>(val_int);
-    cout << left << setw(table_width[3]) << setfill(' ') << ieee_754_value << endl;
+void print_row(bool const test_success, float const rand_val,
+               uint32_t const val_int, float const ieee_754_value) {
+  // print results
+  string const pass_fail = test_success ? "PASS" : "FAIL";
+  cout << left << setw(table_width[0]) << setfill(' ') << pass_fail;
+  cout << left << setw(table_width[1]) << setfill(' ') << rand_val;
+  cout << left << setw(table_width[2]) << setfill(' ')
+       << bitset<width>(val_int);
+  cout << left << setw(table_width[3]) << setfill(' ') << ieee_754_value
+       << endl;
 }
 
 template <typename T>
 T rand_min_max(T const min, T const max) {
-    T const rand_val =
-        min + static_cast<double>(static_cast<double>(rand())) / (static_cast<double>(RAND_MAX / (max - min)));
-    return rand_val;
+  T const rand_val = min + static_cast<double>(static_cast<double>(rand())) /
+                               (static_cast<double>(RAND_MAX / (max - min)));
+  return rand_val;
 }
 
 bool test() {
-    // the union
-    union float_uint {
-        float val_float;
-        uint32_t val_int;
-    } data;
+  // the union
+  union float_uint {
+    float val_float;
+    uint32_t val_int;
+  } data;
 
-    // print header
-    header();
+  // print header
+  header();
 
-    // seed the random number generator
-    srand(time(NULL));
+  // seed the random number generator
+  srand(time(NULL));
 
-    bool success = true;
-    uint16_t pass = 0;
-    for (size_t i = 0; i < NUM_TESTS; i++) {
-        // random value
-        float const rand_val = rand_min_max<float>(MIN_VALUE, MAX_VALUE);
+  bool success = true;
+  uint16_t pass = 0;
+  for (size_t i = 0; i < NUM_TESTS; i++) {
+    // random value
+    float const rand_val = rand_min_max<float>(MIN_VALUE, MAX_VALUE);
 
-        data.val_float = rand_val;
+    data.val_float = rand_val;
 
-        // calculate using ieee_754 function
-        float ieee_754_value = ieee_754(data.val_int);
+    // calculate using ieee_754 function
+    float ieee_754_value = ieee_754(data.val_int);
 
-        // test the results
-        float const epsilon = std::numeric_limits<float>::epsilon();
-        bool test_success = (abs(ieee_754_value - rand_val) < epsilon);
-        if (test_success) {
-            pass += 1;
-        }
-
-        // print row
-        print_row(test_success, rand_val, data.val_int, ieee_754_value);
+    // test the results
+    float const epsilon = std::numeric_limits<float>::epsilon();
+    bool test_success = (abs(ieee_754_value - rand_val) < epsilon);
+    if (test_success) {
+      pass += 1;
     }
 
-    // summarize results
-    cout << "-------------------------------------------" << endl;
-    if (pass == NUM_TESTS) {
-        cout << "SUCCESS ";
-    } else {
-        cout << "FAILURE ";
-    }
-    cout << pass << "/" << NUM_TESTS << " passed" << endl;
-    cout << "-------------------------------------------" << endl;
+    // print row
+    print_row(test_success, rand_val, data.val_int, ieee_754_value);
+  }
 
-    return success;
+  // summarize results
+  cout << "-------------------------------------------" << endl;
+  if (pass == NUM_TESTS) {
+    cout << "SUCCESS ";
+  } else {
+    cout << "FAILURE ";
+  }
+  cout << pass << "/" << NUM_TESTS << " passed" << endl;
+  cout << "-------------------------------------------" << endl;
+
+  return success;
 }
 
 int main() {
-    if (!test()) {
-        return -1;
-    }
-    return 0;
+  if (!test()) {
+    return -1;
+  }
+  return 0;
 }
