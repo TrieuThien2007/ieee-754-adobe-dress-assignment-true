@@ -49,7 +49,8 @@ float ieee_754(uint32_t const data) {
 
     float value;
     
-    value = 1.23;
+    value = sign_value * (leading_bit + mantissa)
+    * pow(2.0F, actual_exponent);
     return value;
 }
 
